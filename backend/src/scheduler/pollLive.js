@@ -226,6 +226,13 @@ export async function pollLive() {
     logger.warn('[pollLive] peak records check failed:', err.message),
   );
 
+  // 7. Record today's rank snapshot for each leaderboard game (fire and forget)
+  pool.query(
+    `INSERT INTO rank_history (appid, recorded_date, rank)
+     SELECT appid, CURRENT_DATE, rank FROM leaderboard_cache
+     ON CONFLICT (appid, recorded_date) DO NOTHING`,
+  ).catch((err) => logger.warn('[pollLive] rank history failed:', err.message));
+
   // 7. Retroactive history backfill for brand-new games (fire and forget)
   for (const appid of newGameIds) {
     backfillNewGame(appid).catch((err) =>

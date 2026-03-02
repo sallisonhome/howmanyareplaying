@@ -18,6 +18,8 @@ export const api = {
   searchGames:   (q) => request(`/search?q=${encodeURIComponent(q)}`),
   getMovers:     () => request('/movers'),
   getRecords:    () => request('/records'),
-  getNews:        ()  => request('/news'),
-  getNewsPreview: ()  => request('/news?limit=10'),
+  getNews:          ()              => request('/news'),
+  getNewsPreview:   ()              => request('/news?limit=10'),
+  getHourlyPattern: (appid)         => request(`/history/${appid}/hourly`),
+  getRankHistory:   (appid, range = '3m') => request(`/history/${appid}/rank?range=${range}`),
 };

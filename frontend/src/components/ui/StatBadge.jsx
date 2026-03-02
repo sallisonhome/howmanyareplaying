@@ -1,11 +1,12 @@
 import React from 'react';
 import './StatBadge.css';
 
-export default function StatBadge({ label, value }) {
+export default function StatBadge({ label, value, sub }) {
   return (
     <div className="stat-badge">
       <span className="stat-badge__label">{label}</span>
       <span className="stat-badge__value">{value}</span>
+      {sub && <span className="stat-badge__sub">{sub}</span>}
     </div>
   );
 }

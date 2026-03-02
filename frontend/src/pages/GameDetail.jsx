@@ -3,29 +3,52 @@ import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { useHistory } from '../hooks/useHistory.js';
 import { api } from '../services/api.js';
 import CcuAreaChart from '../components/charts/CcuAreaChart.jsx';
+import RankHistoryChart from '../components/charts/RankHistoryChart.jsx';
+import HourlyChart from '../components/charts/HourlyChart.jsx';
 import TimeRangeFilter from '../components/filters/TimeRangeFilter.jsx';
 import StatBadge from '../components/ui/StatBadge.jsx';
 import Spinner from '../components/ui/Spinner.jsx';
 import ErrorBanner from '../components/ui/ErrorBanner.jsx';
 import { formatNumber } from '../utils/formatNumber.js';
+import { formatShortDate } from '../utils/formatDate.js';
 import './GameDetail.css';
+
+const VALID_CCU_RANGES  = new Set(['week', 'month', '3m', '6m', '1y', 'all']);
+const VALID_RANK_RANGES = new Set(['3m', '6m', '1y', 'all']);
 
 export default function GameDetail() {
   const { appid } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const range = searchParams.get('range') ?? 'week';
-  const VALID_RANGES = new Set(['week', 'month']);
-  const safeRange = VALID_RANGES.has(range) ? range : 'week';
+  const range     = searchParams.get('range')      ?? 'week';
+  const rankRange = searchParams.get('rankRange')  ?? '3m';
+  const safeRange     = VALID_CCU_RANGES.has(range)      ? range     : 'week';
+  const safeRankRange = VALID_RANK_RANGES.has(rankRange) ? rankRange : '3m';
 
-  const [game, setGame] = useState(null);
-  const [gameError, setGameError] = useState(null);
-  const { data: historyData, allTimePeak, loading: historyLoading, error: historyError } = useHistory(appid, safeRange);
+  const [game, setGame]               = useState(null);
+  const [gameError, setGameError]     = useState(null);
+  const [rankData, setRankData]       = useState(null);
+  const [hourlyData, setHourlyData]   = useState(null);
+
+  const { data: historyData, allTimePeak, allTimePeakDate, loading: historyLoading, error: historyError } =
+    useHistory(appid, safeRange);
 
   useEffect(() => {
     api.getGame(appid)
       .then(setGame)
       .catch((err) => setGameError(err.message));
   }, [appid]);
+
+  useEffect(() => {
+    api.getHourlyPattern(appid)
+      .then((result) => setHourlyData(result.data))
+      .catch(() => setHourlyData([]));
+  }, [appid]);
+
+  useEffect(() => {
+    api.getRankHistory(appid, safeRankRange)
+      .then((result) => setRankData(result.data))
+      .catch(() => setRankData([]));
+  }, [appid, safeRankRange]);
 
   useEffect(() => {
     if (!game) return;
@@ -45,8 +68,24 @@ export default function GameDetail() {
   }, []);
 
   const handleRangeChange = (newRange) => {
-    setSearchParams({ range: newRange }, { replace: true });
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('range', newRange);
+      return next;
+    }, { replace: true });
   };
+
+  const handleRankRangeChange = (newRange) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('rankRange', newRange);
+      return next;
+    }, { replace: true });
+  };
+
+  const momValue = game?.mom_pct != null
+    ? `${game.mom_pct >= 0 ? '▲' : '▼'} ${Math.abs(game.mom_pct)}%`
+    : null;
 
   return (
     <div className="game-detail-page">
@@ -77,7 +116,17 @@ export default function GameDetail() {
                 <StatBadge label="Peak (24h)" value={formatNumber(game.peak_24h)} />
               )}
               {allTimePeak != null && (
-                <StatBadge label="All-time Peak" value={formatNumber(allTimePeak)} />
+                <StatBadge
+                  label="All-time Peak"
+                  value={formatNumber(allTimePeak)}
+                  sub={formatShortDate(allTimePeakDate)}
+                />
+              )}
+              {momValue && (
+                <StatBadge
+                  label="vs Last Month"
+                  value={momValue}
+                />
               )}
             </div>
           </div>
@@ -89,12 +138,28 @@ export default function GameDetail() {
           <h2 className="chart-section__title">Player Count History</h2>
           <TimeRangeFilter value={safeRange} onChange={handleRangeChange} />
         </div>
-
         {historyLoading && <Spinner />}
         {historyError && <ErrorBanner message={historyError} />}
         {!historyLoading && historyData && (
           <CcuAreaChart data={historyData} range={safeRange} allTimePeak={allTimePeak} />
         )}
+      </div>
+
+      <div className="chart-section">
+        <div className="chart-section__header">
+          <h2 className="chart-section__title">Rank History</h2>
+          <TimeRangeFilter value={safeRankRange} onChange={handleRankRangeChange} rankMode={true} />
+        </div>
+        {rankData === null && <Spinner />}
+        {rankData !== null && (
+          <RankHistoryChart data={rankData} range={safeRankRange} />
+        )}
+      </div>
+
+      <div className="chart-section">
+        <h2 className="chart-section__title">Peak Hours</h2>
+        {hourlyData === null && <Spinner />}
+        {hourlyData !== null && <HourlyChart data={hourlyData} />}
       </div>
     </div>
   );

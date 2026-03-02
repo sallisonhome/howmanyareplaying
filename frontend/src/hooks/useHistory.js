@@ -4,6 +4,7 @@ import { api } from '../services/api.js';
 export function useHistory(appid, range) {
   const [data, setData] = useState(null);
   const [allTimePeak, setAllTimePeak] = useState(null);
+  const [allTimePeakDate, setAllTimePeakDate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -15,6 +16,7 @@ export function useHistory(appid, range) {
       .then((result) => {
         setData(result.data);
         setAllTimePeak(result.all_time_peak ?? null);
+        setAllTimePeakDate(result.all_time_peak_date ?? null);
       })
       .catch((err) => {
         setError(err.message);
@@ -22,5 +24,5 @@ export function useHistory(appid, range) {
       .finally(() => setLoading(false));
   }, [appid, range]);
 
-  return { data, allTimePeak, loading, error };
+  return { data, allTimePeak, allTimePeakDate, loading, error };
 }

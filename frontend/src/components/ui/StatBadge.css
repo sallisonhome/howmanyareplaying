@@ -22,3 +22,9 @@
   color: var(--color-accent);
   margin-top: 4px;
 }
+
+.stat-badge__sub {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}

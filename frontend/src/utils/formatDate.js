@@ -1,14 +1,26 @@
 /**
  * Formats a date/datetime string for chart axis labels.
- * range=day  → "14:30"
- * range=month/year → "Jan 15"
+ * range=day        → "14:30"
+ * range=week/month → "Jan 15"
+ * range=3m/6m/1y/all → "Jan '25"
  */
 export function formatAxisDate(value, range) {
   const d = new Date(value);
   if (range === 'day') {
     return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
   }
+  if (range === '3m' || range === '6m' || range === '1y' || range === 'all') {
+    return d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+  }
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+/**
+ * Short human-readable date for display (e.g. "Mar 2, 2020").
+ */
+export function formatShortDate(value) {
+  if (!value) return '';
+  return new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 /**
