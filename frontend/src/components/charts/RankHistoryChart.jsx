@@ -39,10 +39,13 @@ function RankTooltip({ active, payload, label, range }) {
 }
 
 export default function RankHistoryChart({ data, range }) {
+  const expectedDays = RANGE_DAYS[range] ?? 90;
+  const actualDays   = data?.length ?? 0;
+
+  // Show empty state only if truly no data
   if (!data || data.length === 0) {
     const label = RANGE_LABELS[range] ?? range;
-    const needed = RANGE_DAYS[range] ?? 90;
-    const daysNeeded = needed === Infinity ? 'more time' : `${needed} days`;
+    const daysNeeded = expectedDays === Infinity ? 'more time' : `${expectedDays} days`;
     return (
       <div className="chart-empty">
         <p>No rank history available for this time range yet.</p>
@@ -54,14 +57,15 @@ export default function RankHistoryChart({ data, range }) {
     );
   }
 
-  // If we have data but it's sparse (fewer than 5 points), show a notice alongside the chart
-  const sparse = data.length < 5;
+  // Show a notice if we have significantly less data than the range calls for
+  const isPartial = expectedDays !== Infinity && actualDays < expectedDays * 0.8;
 
   return (
     <div className="chart-container">
-      {sparse && (
+      {isPartial && (
         <div className="chart-notice">
-          Only {data.length} day{data.length !== 1 ? 's' : ''} of rank data collected so far — chart will fill in over time.
+          Showing {actualDays} day{actualDays !== 1 ? 's' : ''} of rank data — this chart fills in over time.
+          {expectedDays !== Infinity && ` Full ${RANGE_LABELS[range]} view needs ${expectedDays} days.`}
         </div>
       )}
       <ResponsiveContainer width="100%" height={280}>
