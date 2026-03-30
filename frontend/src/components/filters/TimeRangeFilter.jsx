@@ -11,6 +11,8 @@ const RANGES = [
 ];
 
 const RANK_RANGES = [
+  { value: '7d',  label: '7D' },
+  { value: '30d', label: '30D' },
   { value: '3m',  label: '3M' },
   { value: '6m',  label: '6M' },
   { value: '1y',  label: '1Y' },

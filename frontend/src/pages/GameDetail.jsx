@@ -14,15 +14,15 @@ import { formatShortDate } from '../utils/formatDate.js';
 import './GameDetail.css';
 
 const VALID_CCU_RANGES  = new Set(['week', 'month', '3m', '6m', '1y', 'all']);
-const VALID_RANK_RANGES = new Set(['3m', '6m', '1y', 'all']);
+const VALID_RANK_RANGES = new Set(['7d', '30d', '3m', '6m', '1y', 'all']);
 
 export default function GameDetail() {
   const { appid } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const range     = searchParams.get('range')      ?? 'week';
-  const rankRange = searchParams.get('rankRange')  ?? '3m';
+  const rankRange = searchParams.get('rankRange')  ?? '7d';
   const safeRange     = VALID_CCU_RANGES.has(range)      ? range     : 'week';
-  const safeRankRange = VALID_RANK_RANGES.has(rankRange) ? rankRange : '3m';
+  const safeRankRange = VALID_RANK_RANGES.has(rankRange) ? rankRange : '7d';
 
   const [game, setGame]               = useState(null);
   const [gameError, setGameError]     = useState(null);

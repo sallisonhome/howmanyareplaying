@@ -33,10 +33,24 @@ router.get('/:appid/rank', asyncHandler(async (req, res) => {
     return res.status(400).json({ error: 'Invalid appid' });
   }
 
-  const range = req.query.range ?? '3m';
+  const range = req.query.range ?? '7d';
 
   let rows;
-  if (range === '3m') {
+  if (range === '7d') {
+    ({ rows } = await pool.query(
+      `SELECT rank, recorded_date AS time FROM rank_history
+       WHERE appid = $1 AND recorded_date >= CURRENT_DATE - INTERVAL '7 days'
+       ORDER BY recorded_date ASC`,
+      [appid],
+    ));
+  } else if (range === '30d') {
+    ({ rows } = await pool.query(
+      `SELECT rank, recorded_date AS time FROM rank_history
+       WHERE appid = $1 AND recorded_date >= CURRENT_DATE - INTERVAL '30 days'
+       ORDER BY recorded_date ASC`,
+      [appid],
+    ));
+  } else if (range === '3m') {
     ({ rows } = await pool.query(
       `SELECT rank, recorded_date AS time FROM rank_history
        WHERE appid = $1 AND recorded_date >= CURRENT_DATE - INTERVAL '90 days'
@@ -65,7 +79,7 @@ router.get('/:appid/rank', asyncHandler(async (req, res) => {
       [appid],
     ));
   } else {
-    return res.status(400).json({ error: 'range must be 3m, 6m, 1y, or all' });
+    return res.status(400).json({ error: 'range must be 7d, 30d, 3m, 6m, 1y, or all' });
   }
 
   res.json({ appid, range, data: rows });
