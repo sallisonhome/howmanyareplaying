@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../services/api.js';
+import SEOHead from '../components/seo/SEOHead.jsx';
 import { NewsCard } from '../components/news/NewsFeedPreview.jsx';
 import Spinner from '../components/ui/Spinner.jsx';
 import ErrorBanner from '../components/ui/ErrorBanner.jsx';
@@ -13,16 +14,6 @@ export default function News() {
   const [error, setError]       = useState(null);
 
   useEffect(() => {
-    document.title = 'CCU News | How Many Are Playing';
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content',
-      'Gaming news about Steam concurrent player counts, CCU records, and player base changes for top games.');
-    return () => {
-      document.title = 'Top 100 Steam Games by CCU | How Many Are Playing';
-    };
-  }, []);
-
-  useEffect(() => {
     api.getNews()
       .then((result) => { setArticles(result.data); setError(null); })
       .catch((err)   => setError(err.message))
@@ -31,6 +22,11 @@ export default function News() {
 
   return (
     <div className="news-page">
+      <SEOHead
+        title="CCU News — Steam Player Count Updates | How Many Are Playing"
+        description="Latest news about Steam game player counts, CCU records, and gaming industry trends."
+        path="/news"
+      />
       <Link to="/" className="back-link">← Back to Leaderboard</Link>
 
       <div className="news-page__header">

@@ -1,6 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useLiveData } from '../hooks/useLiveData.js';
+import SEOHead from '../components/seo/SEOHead.jsx';
+import JsonLd from '../components/seo/JsonLd.jsx';
 import LeaderboardTable from '../components/leaderboard/LeaderboardTable.jsx';
 import MoversView from '../components/leaderboard/MoversView.jsx';
 import RecordsView from '../components/leaderboard/RecordsView.jsx';
@@ -44,12 +46,33 @@ export default function Home() {
 
   const { data, meta, loading, error, refetch } = useLiveData(view);
 
-  useEffect(() => {
-    const seo = VIEW_SEO[view] ?? VIEW_SEO.live;
-    document.title = seo.title;
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', seo.desc);
-  }, [view]);
+  const seo = VIEW_SEO[view] ?? VIEW_SEO.live;
+
+  const jsonLdData = useMemo(() => {
+    const graph = [
+      {
+        '@type': 'WebSite',
+        name: 'How Many Are Playing',
+        url: 'https://howmanyareplaying.com',
+        description: 'Real-time Steam concurrent player leaderboard — top 100 games updated every hour. Track player counts, trends, and historical peaks.',
+      },
+    ];
+    if (data && data.length > 0) {
+      graph.push({
+        '@type': 'ItemList',
+        name: 'Top 100 Steam Games by Concurrent Players',
+        itemListOrder: 'https://schema.org/ItemListOrderDescending',
+        numberOfItems: data.length,
+        itemListElement: data.map((game, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          name: game.name,
+          url: `https://howmanyareplaying.com/game/${game.appid}`,
+        })),
+      });
+    }
+    return { '@context': 'https://schema.org', '@graph': graph };
+  }, [data]);
 
   const handleViewChange = (newView) => {
     setSearchParams({ view: newView });
@@ -64,6 +87,12 @@ export default function Home() {
 
   return (
     <div className="home-page">
+      <SEOHead
+        title={seo.title}
+        description={seo.desc}
+        path={view === 'live' ? '/' : `/?view=${view}`}
+      />
+      <JsonLd data={jsonLdData} />
       <div className="home-header">
         <div>
           <h1 className="home-title">Top 100 Steam Games</h1>

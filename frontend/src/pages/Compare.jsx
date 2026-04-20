@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { api } from '../services/api.js';
+import SEOHead from '../components/seo/SEOHead.jsx';
 import CcuCompareChart from '../components/charts/CcuCompareChart.jsx';
 import Spinner from '../components/ui/Spinner.jsx';
 import ErrorBanner from '../components/ui/ErrorBanner.jsx';
@@ -164,19 +165,20 @@ export default function Compare() {
       .finally(() => setLoading(false));
   }, [appidA, appidB]);
 
-  useEffect(() => {
-    if (gameA && gameB) {
-      document.title = `${gameA.name} vs ${gameB.name} | How Many Are Playing`;
-    } else {
-      document.title = 'Compare Games | How Many Are Playing';
-    }
-    return () => {
-      document.title = 'Top 100 Steam Games by CCU | How Many Are Playing';
-    };
-  }, [gameA, gameB]);
+  const compareTitle = gameA && gameB
+    ? `${gameA.name} vs ${gameB.name} — Player Count Comparison | How Many Are Playing`
+    : 'Compare Steam Games — Player Count Comparison | How Many Are Playing';
+  const compareDesc = gameA && gameB
+    ? `Compare ${gameA.name} vs ${gameB.name} concurrent player counts on Steam. View side-by-side CCU trends and historical data.`
+    : 'Compare concurrent player counts across Steam games. View side-by-side CCU trends and historical data.';
 
   return (
     <div className="compare-page">
+      <SEOHead
+        title={compareTitle}
+        description={compareDesc}
+        path="/compare"
+      />
       <h1 className="compare-title">Compare Games</h1>
       <p className="compare-subtitle">
         Select two games to overlay their 30-day player count history.

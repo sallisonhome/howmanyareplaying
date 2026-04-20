@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../services/api.js';
+import SEOHead from '../components/seo/SEOHead.jsx';
 import RankBadge from '../components/leaderboard/RankBadge.jsx';
 import Spinner from '../components/ui/Spinner.jsx';
 import ErrorBanner from '../components/ui/ErrorBanner.jsx';
@@ -10,13 +11,6 @@ export default function Wishlist() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    document.title = 'Top Upcoming Wishlisted Games on Steam | How Many Are Playing';
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content',
-      'The most-wishlisted upcoming games on Steam — unreleased titles only, ranked and refreshed daily.');
-  }, []);
 
   useEffect(() => {
     api.getWishlist()
@@ -30,6 +24,11 @@ export default function Wishlist() {
 
   return (
     <div className="wishlist-page">
+      <SEOHead
+        title="Wishlist — Track Your Steam Games | How Many Are Playing"
+        description="Track player counts for your favorite Steam games. Add games to your wishlist and monitor CCU trends."
+        path="/wishlist"
+      />
       <div className="wishlist-header">
         <h1 className="wishlist-title">Top Upcoming Wishlisted Games</h1>
         <p className="wishlist-subtitle">Most-wishlisted unreleased games on Steam &mdash; refreshed daily</p>
@@ -58,7 +57,7 @@ export default function Wishlist() {
                       {game.logo && (
                         <img
                           src={game.logo}
-                          alt=""
+                          alt={game.name}
                           className="game-thumb"
                           loading="lazy"
                           width={92}
