@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { useHistory } from '../hooks/useHistory.js';
 import { api } from '../services/api.js';
+import SEOHead from '../components/seo/SEOHead.jsx';
+import JsonLd from '../components/seo/JsonLd.jsx';
 import CcuAreaChart from '../components/charts/CcuAreaChart.jsx';
 import RankHistoryChart from '../components/charts/RankHistoryChart.jsx';
 import HourlyChart from '../components/charts/HourlyChart.jsx';
@@ -52,22 +54,19 @@ export default function GameDetail() {
       .catch(() => setRankData([]));
   }, [appid, safeRankRange]);
 
-  useEffect(() => {
-    if (!game) return;
-    document.title = `${game.name} — Player Count | How Many Are Playing`;
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content',
-      `Live and historical concurrent player count for ${game.name} on Steam.`);
-  }, [game]);
+  const headerImage = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`;
 
-  useEffect(() => {
-    return () => {
-      document.title = 'Top 100 Steam Games by CCU | How Many Are Playing';
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) metaDesc.setAttribute('content',
-        'Real-time Steam concurrent player leaderboard — top 100 games updated every hour. Track player counts, trends, and historical peaks.');
+  const jsonLdData = useMemo(() => {
+    if (!game) return null;
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'VideoGame',
+      name: game.name,
+      gamePlatform: 'PC (Steam)',
+      url: `https://howmanyareplaying.com/game/${appid}`,
+      image: headerImage,
     };
-  }, []);
+  }, [game, appid, headerImage]);
 
   const handleRangeChange = (newRange) => {
     setSearchParams((prev) => {
@@ -94,6 +93,13 @@ export default function GameDetail() {
 
   return (
     <div className="game-detail-page">
+      <SEOHead
+        title={game ? `${game.name} — Player Count | How Many Are Playing` : 'Game Details | How Many Are Playing'}
+        description={game ? `${game.name} live player count on Steam. Track concurrent players, 24h peak, all-time records, and rank trends — updated hourly.` : 'Live and historical concurrent player counts for Steam games.'}
+        path={`/game/${appid}`}
+        image={headerImage}
+      />
+      {jsonLdData && <JsonLd data={jsonLdData} />}
       <Link to="/" replace className="back-link">← Back to Leaderboard</Link>
 
       {gameError && <ErrorBanner message={gameError} />}

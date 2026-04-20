@@ -33,7 +33,7 @@ export default function LeaderboardRow({ game, view = 'live' }) {
           {game.header_image && (
             <img
               src={game.header_image}
-              alt=""
+              alt={game.name}
               className="game-thumb"
               loading="lazy"
               width={92}
