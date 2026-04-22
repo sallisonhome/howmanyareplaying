@@ -10,15 +10,16 @@ router.get('/', asyncHandler(async (_req, res) => {
   const { rows } = await pool.query('SELECT appid FROM games ORDER BY appid');
 
   const staticPages = [
-    { loc: BASE,            changefreq: 'hourly', priority: '1.0' },
-    { loc: `${BASE}/wishlist`, changefreq: 'daily',  priority: '0.7' },
-    { loc: `${BASE}/compare`,  changefreq: 'monthly', priority: '0.5' },
+    { loc: BASE,                 changefreq: 'daily',   priority: '1.0' },
+    { loc: `${BASE}/compare`,   changefreq: 'weekly',  priority: '0.8' },
+    { loc: `${BASE}/watchlist`, changefreq: 'weekly',  priority: '0.6' },
+    { loc: `${BASE}/news`,     changefreq: 'daily',   priority: '0.8' },
   ];
 
   const gamePages = rows.map((r) => ({
     loc: `${BASE}/game/${r.appid}`,
-    changefreq: 'hourly',
-    priority: '0.8',
+    changefreq: 'daily',
+    priority: '0.7',
   }));
 
   const allPages = [...staticPages, ...gamePages];
@@ -33,7 +34,7 @@ router.get('/', asyncHandler(async (_req, res) => {
 ${urlTags.join('\n')}
 </urlset>`;
 
-  res.setHeader('Content-Type', 'application/xml');
+  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
   res.setHeader('Cache-Control', 'public, max-age=3600');
   res.send(xml);
 }));

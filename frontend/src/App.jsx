@@ -7,6 +7,8 @@ import GameDetail from './pages/GameDetail.jsx';
 import Wishlist from './pages/Wishlist.jsx';
 import Compare from './pages/Compare.jsx';
 import News from './pages/News.jsx';
+import AdminLogin from './pages/AdminLogin.jsx';
+import AdminDashboard from './pages/AdminDashboard.jsx';
 
 export default function App() {
   return (
@@ -20,6 +22,8 @@ export default function App() {
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/news" element={<News />} />
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
           </Routes>
         </main>
         <Footer />

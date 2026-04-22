@@ -9,6 +9,7 @@ import moversRouter from './movers.js';
 import recordsRouter from './records.js';
 import newsRouter from './news.js';
 import sitemapRouter from './sitemap.js';
+import robotsRouter from './robots.js';
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use('/api/movers', moversRouter);
 router.use('/api/records', recordsRouter);
 router.use('/api/news', newsRouter);
 router.use('/sitemap.xml', sitemapRouter);
+router.use('/robots.txt', robotsRouter);
 
 export default router;
