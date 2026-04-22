@@ -1,8 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
+import connectPgSimple from 'connect-pg-simple';
 import apiRouter from './routes/index.js';
 import adminRouter from './routes/admin/index.js';
+import pool from './db/pool.js';
 import { pageViewLogger } from './middleware/pageViewLogger.js';
 import { pushError } from './utils/errorBuffer.js';
 import logger from './utils/logger.js';
@@ -20,7 +22,14 @@ export function createApp() {
   app.use(express.json());
 
   // Session middleware (used by admin auth)
+  const PgSession = connectPgSimple(session);
   app.use(session({
+    store: new PgSession({
+      pool,
+      tableName: 'session',
+      createTableIfMissing: false, // migration handles this
+      pruneSessionInterval: 60 * 15, // prune expired sessions every 15 min
+    }),
     secret: process.env.SESSION_SECRET || 'dev-secret-change-me',
     resave: false,
     saveUninitialized: false,
